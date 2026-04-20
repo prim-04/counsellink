@@ -1,0 +1,383 @@
+<div class="portal-shell">
+  <header class="portal-header">
+    <div class="portal-brand">
+      <img src="../assets/usl-logo.png" alt="USL Logo" class="portal-logo">
+      <div>
+        <div class="portal-title">USL CounselLink</div>
+        <div class="portal-subtitle">Counselor Information System</div>
+      </div>
+    </div>
+
+    <nav class="portal-topnav">
+      <a href="#" (click)="openModal('disclaimer'); $event.preventDefault()">Disclaimer</a>
+      <a href="#" (click)="openModal('contact'); $event.preventDefault()">Contact Information</a>
+      <a href="#" (click)="openModal('faq'); $event.preventDefault()">FAQ's</a>
+      <a href="https://usl.edu.ph/">USLWebsite</a>
+    </nav>
+
+    <button class="mobile-menu-toggle" (click)="toggleSidebar()" aria-label="Toggle navigation">
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+    </button>
+  </header>
+
+  <div class="portal-body" [ngClass]="{'sidebar-open': isSidebarOpen}">
+    <aside class="portal-sidebar" [ngClass]="{'mobile-open': isSidebarOpen}">
+      <div class="profile-panel">
+        <div class="profile-avatar">{{ counselorName ? counselorName.charAt(0) : 'C' }}</div>
+        <div class="profile-meta">
+          <div class="profile-name">{{ counselorName }}</div>
+          <div class="profile-specialty">{{ specialty }}</div>
+          <div class="profile-status">Active Counselor</div>
+        </div>
+      </div>
+
+      <div class="sidebar-status">Counselor Portal - {{ currentDate | date:'shortDate' }}</div>
+
+      <nav class="sidebar-menu">
+        <a href="#" class="sidebar-item" [ngClass]="{'active': currentPage === 'dashboard'}" (click)="navigateTo('dashboard'); $event.preventDefault()">Dashboard</a>
+        <a href="#" class="sidebar-item" [ngClass]="{'active': currentPage === 'appointments'}" (click)="navigateTo('appointments'); $event.preventDefault()">Appointments</a>
+        <a href="#" class="sidebar-item" [ngClass]="{'active': currentPage === 'students'}" (click)="navigateTo('students'); $event.preventDefault()">My Students</a>
+        <a href="#" class="sidebar-item" [ngClass]="{'active': currentPage === 'reports'}" (click)="navigateTo('reports'); $event.preventDefault()">Reports</a>
+        <a href="#" class="sidebar-item" [ngClass]="{'active': currentPage === 'notifications'}" (click)="navigateTo('notifications'); $event.preventDefault()">Notifications</a>
+      </nav>
+
+      <div class="sidebar-links">
+        <button class="sidebar-link-button">Change Password</button>
+        <button class="sidebar-link-button" (click)="logout()">Sign Out</button>
+      </div>
+    </aside>
+
+    <main class="portal-main">
+      <!-- DASHBOARD PAGE -->
+      <ng-container *ngIf="currentPage === 'dashboard'">
+        <section class="page-header">
+          <div>
+            <h1>Counselor Dashboard</h1>
+            <p class="page-note">Welcome back, {{ counselorName }}. Here's your counseling overview.</p>
+          </div>
+        </section>
+
+        <section class="cards-row">
+          <article class="data-card stats-card">
+            <div class="card-title">Today's Appointments</div>
+            <div class="stat-number">{{ getTodaysAppointments() }}</div>
+            <div class="stat-label">Scheduled sessions</div>
+          </article>
+
+          <article class="data-card stats-card">
+            <div class="card-title">Pending Requests</div>
+            <div class="stat-number">{{ getPendingAppointments() }}</div>
+            <div class="stat-label">Awaiting approval</div>
+          </article>
+
+          <article class="data-card stats-card">
+            <div class="card-title">Active Students</div>
+            <div class="stat-number">{{ getActiveStudentsCount() }}</div>
+            <div class="stat-label">Under guidance</div>
+          </article>
+        </section>
+
+        <section class="data-card wide-card">
+          <div class="card-title">Recent Activity</div>
+          <div class="activity-list">
+            <div class="activity-item" *ngFor="let activity of recentActivities">
+              <div class="activity-icon">{{ activity.icon }}</div>
+              <div class="activity-content">
+                <div class="activity-text">{{ activity.text }}</div>
+                <div class="activity-time">{{ activity.time }}</div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </ng-container>
+
+      <!-- APPOINTMENTS PAGE -->
+      <ng-container *ngIf="currentPage === 'appointments'">
+        <section class="page-header">
+          <div>
+            <h1>Appointment Management</h1>
+            <p class="page-note">Manage student appointment requests and schedule counseling sessions.</p>
+          </div>
+        </section>
+
+        <section class="appointment-controls">
+          <button class="add-appointment-btn" (click)="openAddAppointmentModal()">+ Add Appointment</button>
+        </section>
+
+        <section class="data-card wide-card">
+          <div class="card-title">Appointment Requests</div>
+          <div class="appointments-list">
+            <div *ngIf="appointments.length > 0; else noAppointments" class="appointments-scroll">
+              <div class="appointment-item" *ngFor="let appointment of appointments" [ngClass]="'status-' + appointment.status.toLowerCase()">
+                <div class="apt-header">
+                  <strong>{{ appointment.studentName }} (ID: {{ appointment.studentId }})</strong>
+                  <span class="apt-status">{{ appointment.status }}</span>
+                </div>
+                <div class="apt-details">
+                  <p><strong>Reason:</strong> {{ appointment.reason }}</p>
+                  <p><strong>Requested:</strong> {{ appointment.requestedDate | date:'short' }}</p>
+                  <p *ngIf="appointment.notes"><strong>Notes:</strong> {{ appointment.notes }}</p>
+                </div>
+                <div class="apt-actions">
+                  <button class="apt-btn view-btn" (click)="viewAppointmentDetails(appointment)">View Details</button>
+                  <button *ngIf="appointment.status === 'Pending'" class="apt-btn approve-btn" (click)="updateAppointmentStatus(appointment, 'Approved')">Approve</button>
+                  <button *ngIf="appointment.status === 'Pending'" class="apt-btn reject-btn" (click)="updateAppointmentStatus(appointment, 'Rejected')">Reject</button>
+                  <button *ngIf="appointment.status === 'Approved'" class="apt-btn complete-btn" (click)="updateAppointmentStatus(appointment, 'Completed')">Mark Complete</button>
+                </div>
+              </div>
+            </div>
+            <ng-template #noAppointments>
+              <div class="no-data">No appointment requests</div>
+            </ng-template>
+          </div>
+        </section>
+      </ng-container>
+
+      <!-- STUDENT APPOINTMENT MODAL -->
+      <div class="modal" *ngIf="showAppointmentModal">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h2>New Appointment</h2>
+            <button class="close-btn" (click)="closeAppointmentModal()">×</button>
+          </div>
+          <div class="modal-body">
+            <div *ngIf="appointmentModalStep === 'choice'" class="modal-choice-grid">
+              <button class="choice-card" (click)="selectAppointmentOption('schedule')">
+                <strong>Schedule for later</strong>
+                <p>Book a future appointment with date, time, and session type.</p>
+              </button>
+              <button class="choice-card" (click)="selectAppointmentOption('walkin')">
+                <strong>Accommodate walk-in</strong>
+                <p>Find the student, start the session, and take digital notes live.</p>
+              </button>
+            </div>
+
+            <div *ngIf="appointmentModalStep === 'schedule'" class="appointment-form">
+              <div class="form-row">
+                <label for="appointmentStudentName">Student Name</label>
+                <input id="appointmentStudentName" type="text" [(ngModel)]="appointmentForm.studentName" placeholder="Student name" title="Student Name" />
+              </div>
+              <div class="form-row">
+                <label for="appointmentStudentId">Student ID</label>
+                <input id="appointmentStudentId" type="text" [(ngModel)]="appointmentForm.studentId" placeholder="Student ID" title="Student ID" />
+              </div>
+              <div class="form-row">
+                <label for="appointmentReason">Reason</label>
+                <textarea id="appointmentReason" [(ngModel)]="appointmentForm.reason" placeholder="Reason for appointment" title="Reason for appointment"></textarea>
+              </div>
+              <div class="form-row split-row">
+                <div>
+                  <label for="appointmentRequestedDate">Schedule date</label>
+                  <input id="appointmentRequestedDate" type="datetime-local" [(ngModel)]="appointmentForm.requestedDate" title="Schedule date" />
+                </div>
+                <div>
+                  <label for="appointmentSessionType">Session type</label>
+                  <select id="appointmentSessionType" [(ngModel)]="appointmentForm.sessionType" title="Session type">
+                    <option value="Individual">Individual</option>
+                    <option value="Group">Group</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-row">
+                <label for="appointmentNotes">Notes</label>
+                <textarea id="appointmentNotes" [(ngModel)]="appointmentForm.notes" placeholder="Additional details" title="Notes"></textarea>
+              </div>
+              <div class="modal-actions">
+                <button class="cancel-btn" (click)="closeAppointmentModal()">Cancel</button>
+                <button class="save-btn" (click)="scheduleNewAppointment()">Save Appointment</button>
+              </div>
+            </div>
+
+            <div *ngIf="appointmentModalStep === 'walkin'" class="walkin-session">
+              <div class="form-row">
+                <label for="walkInSearchTerm">Search student</label>
+                <input id="walkInSearchTerm" type="text" [(ngModel)]="walkInSearchTerm" placeholder="Search by name or ID" title="Search student" />
+              </div>
+              <div class="search-results" *ngIf="filteredWalkInStudents().length > 0">
+                <div class="search-item" *ngFor="let student of filteredWalkInStudents()" (click)="selectWalkInStudent(student)">
+                  <span>{{ student.name }}</span>
+                  <small>{{ student.id }} · {{ student.program }}</small>
+                </div>
+              </div>
+              <div class="no-data" *ngIf="filteredWalkInStudents().length === 0">
+                No matching students found yet.
+              </div>
+              <div *ngIf="selectedWalkInStudent" class="walkin-details">
+                <h3>Selected Student</h3>
+                <p><strong>Name:</strong> {{ selectedWalkInStudent.name }}</p>
+                <p><strong>ID:</strong> {{ selectedWalkInStudent.id }}</p>
+                <p><strong>Program:</strong> {{ selectedWalkInStudent.program }}</p>
+                <p><strong>Year:</strong> {{ selectedWalkInStudent.year }}</p>
+                <p><strong>Last session:</strong> {{ selectedWalkInStudent.lastSession | date:'shortDate' }}</p>
+                <div class="form-row">
+                  <label for="walkInNotes">Digital session notes</label>
+                  <textarea id="walkInNotes" [(ngModel)]="walkInNotes" placeholder="Type session summary and outcomes" title="Digital session notes"></textarea>
+                </div>
+                <div class="modal-actions">
+                  <button class="cancel-btn" (click)="closeAppointmentModal()">Cancel</button>
+                  <button class="save-btn" (click)="completeWalkInSession()">Complete Walk-in Session</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STUDENTS PAGE -->
+      <ng-container *ngIf="currentPage === 'students'">
+        <section class="page-header">
+          <div>
+            <h1>My Students</h1>
+            <p class="page-note">View and manage students under your counseling guidance.</p>
+          </div>
+        </section>
+
+        <section class="data-card wide-card">
+          <div class="card-title">Active Students</div>
+          <div class="students-list">
+            <div *ngIf="activeStudents.length > 0; else noStudents" class="students-scroll">
+              <div class="student-item" *ngFor="let student of activeStudents">
+                <div class="student-avatar">{{ student.name.charAt(0) }}</div>
+                <div class="student-info">
+                  <div class="student-name">{{ student.name }}</div>
+                  <div class="student-details">{{ student.id }} • {{ student.program }} • Year {{ student.year }}</div>
+                  <div class="student-status">Last session: {{ student.lastSession | date:'shortDate' }}</div>
+                </div>
+                <div class="student-actions">
+                  <button class="student-btn" (click)="viewStudentProfile(student)">View Profile</button>
+                </div>
+              </div>
+            </div>
+            <ng-template #noStudents>
+              <div class="no-data">No active students</div>
+            </ng-template>
+          </div>
+        </section>
+      </ng-container>
+
+      <!-- REPORTS PAGE -->
+      <ng-container *ngIf="currentPage === 'reports'">
+        <section class="page-header">
+          <div>
+            <h1>Counseling Reports</h1>
+            <p class="page-note">Generate and view counseling session reports and statistics.</p>
+          </div>
+        </section>
+
+        <section class="cards-row">
+          <article class="data-card">
+            <div class="card-title">Monthly Summary</div>
+            <div class="report-stats">
+              <div class="stat-item">
+                <span class="stat-value">{{ monthlyStats.sessions }}</span>
+                <span class="stat-label">Sessions Conducted</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-value">{{ monthlyStats.students }}</span>
+                <span class="stat-label">Unique Students</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-value">{{ monthlyStats.avgRating }}</span>
+                <span class="stat-label">Avg Rating</span>
+              </div>
+            </div>
+          </article>
+
+          <article class="data-card">
+            <div class="card-title">Common Concerns</div>
+            <div class="concerns-chart">
+              <div class="concern-item" *ngFor="let concern of commonConcerns">
+                <span class="concern-name">{{ concern.name }}</span>
+                <div class="concern-bar">
+                  <div class="concern-fill" [style.width.%]="concern.percentage"></div>
+                </div>
+                <span class="concern-count">{{ concern.count }}</span>
+              </div>
+            </div>
+          </article>
+        </section>
+      </ng-container>
+
+      <!-- NOTIFICATIONS PAGE -->
+      <ng-container *ngIf="currentPage === 'notifications'">
+        <section class="page-header">
+          <div>
+            <h1>Notifications</h1>
+            <p class="page-note">Stay updated with appointment requests and system announcements.</p>
+          </div>
+        </section>
+
+        <section class="data-card wide-card">
+          <div class="card-title">Recent Notifications</div>
+          <div class="notifications-list">
+            <div *ngIf="notifications.length > 0; else noNotifications" class="notifications-scroll">
+              <div class="notification-item" *ngFor="let notif of notifications" [ngClass]="'type-' + notif.type">
+                <div class="notif-header">
+                  <span class="notif-type">{{ notif.type | titlecase }}</span>
+                  <span class="notif-date">{{ notif.date | date:'short' }}</span>
+                </div>
+                <div class="notif-message">{{ notif.message }}</div>
+                <div class="notif-actions">
+                  <button class="notif-btn dismiss-btn" (click)="dismissNotification(notif.id)">Mark as Read</button>
+                </div>
+              </div>
+            </div>
+            <ng-template #noNotifications>
+              <div class="no-data">No notifications</div>
+            </ng-template>
+          </div>
+        </section>
+      </ng-container>
+    </main>
+  </div>
+</div>
+
+<div class="modal" *ngIf="currentModal === 'disclaimer'" (click)="closeModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Disclaimer</h2>
+      <button class="close-btn" type="button" (click)="closeModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <p>This portal is intended for authorized use only. Sharing credentials or permitting unauthorized access is prohibited.</p>
+      <p>USL provides information here for convenience. Official records are maintained by the Registrar's Office.</p>
+      <p>Portal availability is not guaranteed at all times; technical interruptions may occur.</p>
+      <p>If your data is incorrect or your account is compromised, notify university support immediately.</p>
+    </div>
+  </div>
+</div>
+
+<div class="modal" *ngIf="currentModal === 'contact'" (click)="closeModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Contact Information</h2>
+      <button class="close-btn" type="button" (click)="closeModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <p>Center for Information and Communications Technology (CICT)</p>
+      <p>Phone: (078) 304-1234</p>
+      <p>Email: support@usl.edu.ph</p>
+      <p>Office Hours: Monday to Friday, 8:00 AM – 5:00 PM</p>
+      <p>For counseling or student affairs concerns, contact the appropriate campus office through the official university directory.</p>
+    </div>
+  </div>
+</div>
+
+<div class="modal" *ngIf="currentModal === 'faq'" (click)="closeModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>FAQ's</h2>
+      <button class="close-btn" type="button" (click)="closeModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <p><strong>Q:</strong> How do I reset my password?</p>
+      <p><strong>A:</strong> Use the password recovery tool or contact support to request a reset.</p>
+      <p><strong>Q:</strong> How do I update student records?</p>
+      <p><strong>A:</strong> Changes to student records must be requested through the Registrar or appropriate department.</p>
+      <p><strong>Q:</strong> Who may access the counselor portal?</p>
+      <p><strong>A:</strong> Only assigned counselors and authorized staff may access this portal.</p>
+    </div>
+  </div>
+</div>

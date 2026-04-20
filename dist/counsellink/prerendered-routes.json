@@ -1,0 +1,8 @@
+{
+  "routes": {
+    "/": {},
+    "/counselor-dashboard": {},
+    "/login": {},
+    "/student-dashboard": {}
+  }
+}

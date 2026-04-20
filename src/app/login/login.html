@@ -1,0 +1,136 @@
+<div class="header">
+  <div class="logo">
+    <img src="../assets/usl-logo.png" alt="USL Logo">
+    <span>CounselLink</span>
+  </div>
+
+  <div class="nav-links">
+    <a href="#" (click)="openModal('disclaimer'); $event.preventDefault()">Disclaimer</a>
+    <a href="#" (click)="openModal('contact'); $event.preventDefault()">Contact Information</a>
+    <a href="#" (click)="openModal('faq'); $event.preventDefault()">FAQ's</a>
+    <a href="https://usl.edu.ph/">USL Website</a>
+  </div>
+</div>
+
+<div class="main-container">
+
+  <!-- LOGIN BOX -->
+  <div class="login-box">
+    <div class="login-header">Log In</div>
+
+    <form (ngSubmit)="onLogin()">
+      <input type="text" [(ngModel)]="loginId" id="loginId" name="loginId" placeholder="ID Number" required>
+      <input type="password" [(ngModel)]="password" id="password" name="password" placeholder="Password" required>
+
+      <div *ngIf="errorMessage" class="error-message">
+        {{ errorMessage }}
+      </div>
+
+      <label class="terms">
+        <input type="checkbox" required>
+        <span>I Accept the <a href="#" (click)="openTermsModal(); $event.preventDefault()">Terms and Conditions</a></span>
+      </label>
+
+      <a class="forgot" href="#" (click)="openModal('forgot'); $event.preventDefault()">Forgot password</a>
+
+      <button type="submit">Login</button>
+    </form>
+  </div>
+
+  <div class="tutorial-box">
+
+    <div class="tutorial-header">
+      CounselLink (Login video tutorial)
+    </div>
+
+    <div class="video-container">
+      <iframe width="100%" height="315" src="https://www.youtube.com/watch?v=mr15Xzb1Ook" title="USL MyPortal Login Video Tutorial"
+      frameborder="0" allowfullscreen>
+        </iframe>
+    </div>
+
+    <div class="test-credentials">
+      <h4>Test Credentials:</h4>
+      <p><strong>Students:</strong> ID: 12345678, 2300053, 0900025 | Password: 123</p>
+      <p><strong>Counselors:</strong> ID: C001, C002, C003 | Password: 123</p>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" *ngIf="activeModal === 'terms'" (click)="closeModal()">
+  <div class="modal-window" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Terms of Use</h2>
+      <button class="close-btn" type="button" (click)="closeModal()">Close</button>
+    </div>
+    <div class="modal-body">
+      <p>Using this facility on the university website indicates that you have read and accept these terms and conditions and agree to be bound by and comply with them. If you do not accept these terms, do not use this facility.</p>
+      <p>University of Saint Louis reserves the right to modify these terms at any time and will publish notice of any such modifications at this site. By continuing to access the portal after notice of such modifications has been published, you signify your agreement to be bound by them.</p>
+      <p>The University of Saint Louis provides electronic access to demographic, grade, and other information related to its students via its Student Portal system. This information is intended for the use of the currently enrolled students, their parents or their legal guardians.</p>
+      <p>The University reserves the right to grant or deny access to the Student Portal system in accordance with the existing ICT policies of the University.</p>
+      <p>The Student/Parent account information to access the portal determines who has access to the student's records and must be current and accurate to ensure the student's privacy. If the user thinks that the account is no longer safe, a new account should be registered at the Center for Information and Communications Technology (CICT). The user name and password used to access student information via the Student Portal system should not be shared with unauthorized individuals. USL will not be responsible for unauthorized access to or use of such information.</p>
+      <p>While USL strives to ensure information on its Student Portal is accurate and up-to-date, the system does not contain official information. Official information is maintained in the student's cumulative record and/or the Registrar's Office files. Any student demographic or contact information that is found to be incorrect should be reported to and corrected by the university through concerned offices. A parent, guardian, or student who believes grade information is incorrect should promptly contact the Teacher of Record for the class in question.</p>
+      <p>Any data presented via the Student Portal is subject to change without notice. Although USL strives to provide access to student information via the Student Portal system at all times, technical difficulties, including those beyond our control, may make such access temporarily unavailable. As a result, continuous, uninterrupted access to the Student Portal cannot be guaranteed.</p>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" *ngIf="activeModal === 'disclaimer'" (click)="closeModal()">
+  <div class="modal-window" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Disclaimer</h2>
+      <button class="close-btn" type="button" (click)="closeModal()">Close</button>
+    </div>
+    <div class="modal-body">
+      <p>This portal is intended for authorized use only. Sharing login credentials or granting access to unauthorized users is prohibited.</p>
+      <p>USL provides information here for convenience, but official records are kept by the Registrar's Office and may differ from portal data.</p>
+      <p>System availability is not guaranteed at all times. Technical issues may affect access without prior notice.</p>
+      <p>If you suspect incorrect data or account compromise, contact university support immediately.</p>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" *ngIf="activeModal === 'contact'" (click)="closeModal()">
+  <div class="modal-window" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Contact Information</h2>
+      <button class="close-btn" type="button" (click)="closeModal()">Close</button>
+    </div>
+    <div class="modal-body">
+      <p>Center for Information and Communications Technology (CICT)</p>
+      <p>Phone: (078) 304-1234</p>
+      <p>Email: support@usl.edu.ph</p>
+      <p>Office Hours: Monday to Friday, 8:00 AM – 5:00 PM</p>
+      <p>For student records or counseling support, please use official university contact channels.</p>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" *ngIf="activeModal === 'faq'" (click)="closeModal()">
+  <div class="modal-window" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>FAQ's</h2>
+      <button class="close-btn" type="button" (click)="closeModal()">Close</button>
+    </div>
+    <div class="modal-body">
+      <p><strong>Q:</strong> What if I forget my password?</p>
+      <p><strong>A:</strong> Use the password reset option or contact our support team for assistance.</p>
+      <p><strong>Q:</strong> How do I update my personal information?</p>
+      <p><strong>A:</strong> Contact the Registrar's office or your counselor to request changes.</p>
+      <p><strong>Q:</strong> Who can access this portal?</p>
+      <p><strong>A:</strong> Only enrolled students, authorized parents/guardians, and counselors are permitted access.</p>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" *ngIf="activeModal === 'forgot'" (click)="closeModal()">
+  <div class="modal-window" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Forgot Password</h2>
+      <button class="close-btn" type="button" (click)="closeModal()">Close</button>
+    </div>
+    <div class="modal-body">
+      <p>This feature is under development. Please contact support or try again later.</p>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,343 @@
+<div class="portal-shell">
+  <header class="portal-header">
+    <div class="portal-brand">
+      <img src="../assets/usl-logo.png" alt="USL Logo" class="portal-logo">
+      <div>
+        <div class="portal-title">USL CounselLink</div>
+        <div class="portal-subtitle">Student Information System</div>
+      </div>
+    </div>
+
+    <nav class="portal-topnav">
+      <a href="#" (click)="openModal('disclaimer'); $event.preventDefault()">Disclaimer</a>
+      <a href="#" (click)="openModal('contact'); $event.preventDefault()">Contact Information</a>
+      <a href="#" (click)="openModal('faq'); $event.preventDefault()">FAQ's</a>
+      <a href="https://usl.edu.ph/">USLWebsite</a>
+    </nav>
+
+    <button class="mobile-menu-toggle" (click)="toggleSidebar()" aria-label="Toggle navigation">
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+    </button>
+  </header>
+
+  <div class="portal-body" [ngClass]="{'sidebar-open': isSidebarOpen}">
+    <aside class="portal-sidebar" [ngClass]="{'mobile-open': isSidebarOpen}">
+      <div class="profile-panel">
+        <div class="profile-avatar">{{ studentInfo.name ? studentInfo.name.charAt(0) : 'S' }}</div>
+        <div class="profile-meta">
+          <div class="profile-name">{{ studentInfo.name }}</div>
+          <div class="profile-id">{{ studentInfo.studentId }}</div>
+          <div class="profile-course">{{ studentInfo.program }} - {{ studentInfo.yearLevel }}</div>
+        </div>
+      </div>
+
+      <div class="sidebar-status">{{ semesterInfo }}</div>
+
+      <nav class="sidebar-menu">
+        <a href="#" class="sidebar-item" [ngClass]="{'active': currentPage === 'personal-data'}" (click)="navigateTo('personal-data'); $event.preventDefault()">Personal Data</a>
+        <a href="#" class="sidebar-item" [ngClass]="{'active': currentPage === 'appointments'}" (click)="navigateTo('appointments'); $event.preventDefault()">Appointments</a>
+        <a href="#" class="sidebar-item" [ngClass]="{'active': currentPage === 'appointment-history'}" (click)="navigateTo('appointment-history'); $event.preventDefault()">Appointment History</a>
+        <a href="#" class="sidebar-item" [ngClass]="{'active': currentPage === 'notifications'}" (click)="navigateTo('notifications'); $event.preventDefault()">Notifications</a>
+      </nav>
+
+      <div class="sidebar-links">
+        <button class="sidebar-link-button">Change Password</button>
+        <button class="sidebar-link-button" (click)="logout()">Sign Out</button>
+      </div>
+    </aside>
+
+    <main class="portal-main">
+      <!-- PERSONAL DATA PAGE -->
+      <ng-container *ngIf="currentPage === 'personal-data'">
+        <section class="page-header">
+          <div>
+            <h1>Personal Data</h1>
+            <p class="page-note">Disclaimer: If there are information here that need to be updated, please inform the Office of Student Affairs and Services (OSAS).</p>
+          </div>
+        </section>
+
+        <section class="cards-row">
+          <article class="data-card">
+            <div class="card-title">Basic Information</div>
+            <div class="card-grid">
+              <div>
+                <span>Name</span>
+                <strong>{{ studentInfo.name }}</strong>
+              </div>
+              <div>
+                <span>Student ID</span>
+                <strong>{{ studentInfo.studentId }}</strong>
+              </div>
+              <div>
+                <span>Program</span>
+                <strong>{{ studentInfo.program }}</strong>
+              </div>
+              <div>
+                <span>Year / Section</span>
+                <strong>{{ studentInfo.yearLevel }} - {{ studentInfo.section }}</strong>
+              </div>
+              <div class="full-width">
+                <span>Campus</span>
+                <strong>{{ studentInfo.campus }}</strong>
+              </div>
+            </div>
+          </article>
+
+          <article class="data-card">
+            <div class="card-title">Contact Information</div>
+            <div class="card-grid">
+              <div>
+                <span>Email</span>
+                <strong>{{ studentInfo.email }}</strong>
+              </div>
+              <div>
+                <span>Mobile No.</span>
+                <strong>{{ studentInfo.mobile }}</strong>
+              </div>
+              <div>
+                <span>Landline</span>
+                <strong>{{ studentInfo.landline }}</strong>
+              </div>
+              <div class="full-width">
+                <span>Address</span>
+                <strong>{{ studentInfo.address }}</strong>
+              </div>
+            </div>
+          </article>
+        </section>
+
+        <section class="data-card wide-card">
+          <div class="card-title">Family Background</div>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>FAMILY MEMBER NAME</th>
+                  <th>RELATIONSHIP</th>
+                  <th>LANDLINE</th>
+                  <th>MOBILE NO.</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let member of familyBackground">
+                  <td>{{ member.name }}</td>
+                  <td>{{ member.relationship }}</td>
+                  <td>{{ member.landline }}</td>
+                  <td>{{ member.mobile }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="data-card wide-card">
+          <div class="card-title">Educational Background</div>
+          <div class="education-grid">
+            <div>
+              <span>School</span>
+              <strong>{{ educationBackground.school }}</strong>
+            </div>
+            <div>
+              <span>Degree</span>
+              <strong>{{ educationBackground.degree }}</strong>
+            </div>
+            <div>
+              <span>Year Graduated</span>
+              <strong>{{ educationBackground.yearGraduated }}</strong>
+            </div>
+            <div>
+              <span>Honors</span>
+              <strong>{{ educationBackground.honors }}</strong>
+            </div>
+          </div>
+        </section>
+      </ng-container>
+
+      <!-- APPOINTMENTS PAGE -->
+      <ng-container *ngIf="currentPage === 'appointments'">
+        <section class="page-header">
+          <div>
+            <h1>My Appointments</h1>
+            <p class="page-note">View and manage your counseling appointments with the university counselors.</p>
+          </div>
+        </section>
+
+        <section class="cards-row two-columns">
+          <!-- Appointments List -->
+          <article class="data-card appointment-card">
+            <div class="card-title">Scheduled Appointments</div>
+            <div class="appointments-list">
+              <div *ngIf="requestedAppointments.length > 0; else noAppointments" class="appointments-scroll">
+                <div class="appointment-item" *ngFor="let apt of requestedAppointments" [ngClass]="'status-' + apt.status.toLowerCase()">
+                  <div class="apt-header">
+                    <strong>{{ apt.concern }}</strong>
+                    <span class="apt-status">{{ apt.status }}</span>
+                  </div>
+                  <div class="apt-details">
+                    <p><strong>Assigned Counselor:</strong> {{ apt.assignedCounselor }}</p>
+                    <p><strong>Reason:</strong> {{ apt.reason }}</p>
+                    <p><strong>Date:</strong> {{ apt.date }}</p>
+                    <p><strong>Time:</strong> {{ apt.time }}</p>
+                  </div>
+                  <div class="apt-actions">
+                    <button class="apt-btn cancel-btn" (click)="cancelAppointment(apt.id)">Cancel</button>
+                  </div>
+                </div>
+              </div>
+              <ng-template #noAppointments>
+                <div class="no-data">No appointments scheduled</div>
+              </ng-template>
+            </div>
+          </article>
+
+          <!-- Create Appointment Form -->
+          <article class="data-card appointment-card">
+            <div class="card-title">Request New Appointment</div>
+            <form (ngSubmit)="createAppointment()" class="appointment-form-card">
+              <div class="form-group">
+                <label for="concern-select">Type of Concern</label>
+                <select id="concern-select" [(ngModel)]="selectedConcern" name="concern" required>
+                  <option value="" disabled selected>Select your concern type...</option>
+                  <option *ngFor="let c of concerns" [value]="c.id">{{ c.type }}</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="reason">Reason for Appointment</label>
+                <textarea id="reason" [(ngModel)]="appointmentReason" name="reason" placeholder="Describe the reason of your appointment..." required></textarea>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="date">Preferred Date</label>
+                  <input type="date" id="date" [(ngModel)]="appointmentDate" name="date" required>
+                </div>
+                <div class="form-group">
+                  <label for="time">Preferred Time</label>
+                  <input type="time" id="time" [(ngModel)]="appointmentTime" name="time" required>
+                </div>
+              </div>
+
+              <button type="submit" class="submit-btn" [disabled]="!selectedConcern || !appointmentReason.trim() || !appointmentDate || !appointmentTime">Request Appointment</button>
+            </form>
+          </article>
+        </section>
+      </ng-container>
+
+      <!-- NOTIFICATIONS PAGE -->
+      <ng-container *ngIf="currentPage === 'notifications'">
+        <section class="page-header">
+          <div>
+            <h1>Notifications</h1>
+            <p class="page-note">Stay updated with important announcements and appointment reminders.</p>
+          </div>
+        </section>
+
+        <section class="data-card wide-card">
+          <div class="card-title">Recent Notifications</div>
+          <div class="notifications-list">
+            <div *ngIf="notifications.length > 0; else noNotifications" class="notifications-scroll">
+              <div class="notification-item" *ngFor="let notif of notifications" [ngClass]="'type-' + notif.type">
+                <div class="notif-header">
+                  <span class="notif-type">{{ notif.type | titlecase }}</span>
+                  <span class="notif-date">{{ notif.date | date:'short' }}</span>
+                </div>
+                <div class="notif-message">{{ notif.message }}</div>
+                <div class="notif-actions">
+                  <button class="notif-btn dismiss-btn" (click)="dismissNotification(notif.id)">Dismiss</button>
+                </div>
+              </div>
+            </div>
+            <ng-template #noNotifications>
+              <div class="no-data">No notifications</div>
+            </ng-template>
+          </div>
+        </section>
+      </ng-container>
+
+      <!-- APPOINTMENT HISTORY PAGE -->
+      <ng-container *ngIf="currentPage === 'appointment-history'">
+        <section class="page-header">
+          <div>
+            <h1>Appointment History</h1>
+            <p class="page-note">View your past counseling appointments and their outcomes.</p>
+          </div>
+        </section>
+
+        <section class="data-card wide-card">
+          <div class="card-title">Past Appointments</div>
+          <div class="appointments-list">
+            <div *ngIf="appointmentHistory.length > 0; else noHistory" class="appointments-scroll">
+              <div class="appointment-item" *ngFor="let apt of appointmentHistory" [ngClass]="'status-' + apt.status.toLowerCase()">
+                <div class="apt-header">
+                  <strong>{{ apt.concern }}</strong>
+                  <span class="apt-status">{{ apt.status }}</span>
+                </div>
+                <div class="apt-details">
+                  <p><strong>Assigned Counselor:</strong> {{ apt.assignedCounselor }}</p>
+                  <p><strong>Reason:</strong> {{ apt.reason }}</p>
+                  <p><strong>Date:</strong> {{ apt.date }}</p>
+                  <p><strong>Time:</strong> {{ apt.time }}</p>
+                  <p><strong>Outcome:</strong> {{ apt.outcome }}</p>
+                </div>
+              </div>
+            </div>
+            <ng-template #noHistory>
+              <div class="no-data">No appointment history available</div>
+            </ng-template>
+          </div>
+        </section>
+      </ng-container>
+    </main>
+  </div>
+</div>
+
+<div class="modal" *ngIf="currentModal === 'disclaimer'" (click)="closeModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Disclaimer</h2>
+      <button class="close-btn" type="button" (click)="closeModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <p>Access to this portal is granted for official use only. Unauthorized use or sharing of login credentials is forbidden and may lead to account suspension.</p>
+      <p>Information displayed is provided for convenience and may not reflect official records held by the university.</p>
+      <p>USL does not guarantee uninterrupted access. Technical issues may arise and can affect availability at any time.</p>
+      <p>Report any suspected account compromises or incorrect data to the student affairs office immediately.</p>
+    </div>
+  </div>
+</div>
+
+<div class="modal" *ngIf="currentModal === 'contact'" (click)="closeModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Contact Information</h2>
+      <button class="close-btn" type="button" (click)="closeModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <p>Center for Information and Communications Technology (CICT)</p>
+      <p>Phone: (078) 304-1234</p>
+      <p>Email: support@usl.edu.ph</p>
+      <p>Office Hours: Monday to Friday, 8:00 AM – 5:00 PM</p>
+      <p>For student record or registrar inquiries, contact the Office of the Registrar through the official university directory.</p>
+    </div>
+  </div>
+</div>
+
+<div class="modal" *ngIf="currentModal === 'faq'" (click)="closeModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>FAQ's</h2>
+      <button class="close-btn" type="button" (click)="closeModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <p><strong>Q:</strong> I forgot my password. What should I do?</p>
+      <p><strong>A:</strong> Use the password recovery option or contact support for assistance resetting your login.</p>
+      <p><strong>Q:</strong> How can I update my contact information?</p>
+      <p><strong>A:</strong> Notify the registrar or your counselor to submit updates to your profile.</p>
+      <p><strong>Q:</strong> Who can use this portal?</p>
+      <p><strong>A:</strong> Only authorized students, counselors, and approved representatives may access the system.</p>
+    </div>
+  </div>
+</div>
